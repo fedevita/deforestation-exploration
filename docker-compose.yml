@@ -17,6 +17,26 @@ services:
       timeout: 10s
       retries: 5
 
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: deforestation-exploration-pgadmin
+    hostname: deforestation-exploration-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user@domain.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - deforestation-exploration-pgadmin-data:/var/lib/pgadmin
+    ports:
+      - "80:80"
+    networks:
+      - deforestation-exploration-network
+    depends_on:
+      - postgres
+
 networks:
   deforestation-exploration-network:
     name: deforestation-exploration-network
+
+volumes:
+  pgadmindata:
+    name: deforestation-exploration-pgadmin-data
