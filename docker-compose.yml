@@ -16,6 +16,10 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    profiles:
+      - start
+      - import
+      - report
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -32,6 +36,8 @@ services:
       - deforestation-exploration-network
     depends_on:
       - postgres
+    profiles:
+      - start
 
   data-import:
     build: ./deforestation-exploration-data-import
@@ -46,6 +52,8 @@ services:
       - postgres
     networks:
       - deforestation-exploration-network
+    profiles:
+      - import
 
 networks:
   deforestation-exploration-network:
