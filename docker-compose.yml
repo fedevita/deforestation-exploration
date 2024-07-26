@@ -9,6 +9,8 @@ services:
       POSTGRES_PASSWORD: mysecretpassword
     ports:
       - "5432:5432"
+    volumes:
+      - ./dumps:/docker-entrypoint-initdb.d
     networks:
       - deforestation-exploration-network
     healthcheck:
@@ -16,10 +18,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    profiles:
-      - start
-      - import
-      - report
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -36,24 +34,6 @@ services:
       - deforestation-exploration-network
     depends_on:
       - postgres
-    profiles:
-      - start
-
-  data-import:
-    build: ./deforestation-exploration-data-import
-    container_name: deforestation-exploration-data-import
-    hostname: deforestation-exploration-data-import
-    environment:
-      BASE_PATH: /app/datasets
-      DB_URL: postgresql://postgres:mysecretpassword@deforestation-exploration-db:5432/postgres
-    volumes:
-      - ./datasets:/app/datasets
-    depends_on:
-      - postgres
-    networks:
-      - deforestation-exploration-network
-    profiles:
-      - import
 
 networks:
   deforestation-exploration-network:

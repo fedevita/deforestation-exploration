@@ -3,24 +3,7 @@
 
 ### Setting Up the Environment
 
-To set up the environment, you can use either of the following scripts:
-
-- `start-compose.ps1`
-- `start-compose.sh`
-
-Launch the script with different parameters as follows:
-
-```sh
-start-compose.ps1 -Profile start
-start-compose.ps1 -Profile import
-```
-
-or
-
-```sh
-./start-compose.sh start
-./start-compose.sh import
-```
+//TODO
 
 ### Accessing the Database
 
