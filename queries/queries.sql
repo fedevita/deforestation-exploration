@@ -58,23 +58,69 @@ from t3;
 
 
 -- 2. REGIONAL OUTLOOK
--- R_Q - In 2016, what was the percent of the total land area of the world designated as forest?
--- R_Q - Which region had the highest relative forestation in 2016?
--- R_Q - What was the percentage of forestation for the region with the highest relative forestation in 2016?
--- R_Q - Which region had the lowest relative forestation in 2016?
--- R_Q - What was the percentage of forestation for the region with the lowest relative forestation in 2016?
--- R_Q - In 1990, what was the percent of the total land area of the world designated as forest?
--- R_Q - Which region had the highest relative forestation in 1990?
--- R_Q - What was the percentage of forestation for the region with the highest relative forestation in 1990?
--- R_Q - Which region had the lowest relative forestation in 1990?
--- R_Q - What was the percentage of forestation for the region with the lowest relative forestation in 1990?
--- R_Q - Which regions of the world decreased in percent forest area from 1990 to 2016?
--- R_Q - By how much did each of these regions decrease in percentage terms from 1990 to 2016?
--- R_Q - What was the initial percentage of forest area for each of these regions in 1990?
--- R_Q - What was the final percentage of forest area for each of these regions in 2016?
--- R_Q - Did all other regions increase in forest area over this time period?
--- R_Q - What was the impact of the decrease in these two regions on the overall percent forest area of the world from 1990 to 2016?
--- R_Q - What was the percent forest area of the world in 1990?
--- R_Q - What was the percent forest area of the world in 2016?
+-- R_Q1 - In 2016, what was the percent of the total land area of the world designated as forest?
+-- R_Q2 - Which region had the highest relative forestation in 2016?
+-- R_Q3 - What was the percentage of forestation for the region with the highest relative forestation in 2016?
+-- R_Q4 - Which region had the lowest relative forestation in 2016?
+-- R_Q5 - What was the percentage of forestation for the region with the lowest relative forestation in 2016?
+-- R_Q6 - In 1990, what was the percent of the total land area of the world designated as forest?
+-- R_Q7 - Which region had the highest relative forestation in 1990?
+-- R_Q8 - What was the percentage of forestation for the region with the highest relative forestation in 1990?
+-- R_Q9 - Which region had the lowest relative forestation in 1990?
+-- R_Q10 - What was the percentage of forestation for the region with the lowest relative forestation in 1990?
+-- R_Q11 - Which regions of the world decreased in percent forest area from 1990 to 2016?
+-- R_Q12 - By how much did each of these regions decrease in percentage terms from 1990 to 2016?
+-- R_Q13 - What was the initial percentage of forest area for each of these regions in 1990?
+-- R_Q14 - What was the final percentage of forest area for each of these regions in 2016?
+-- R_Q15 - Did all other regions increase in forest area over this time period?
+-- R_Q16 - What was the impact of the decrease in these two regions on the overall percent forest area of the world from 1990 to 2016?
+-- R_Q17 - What was the percent forest area of the world in 1990?
+-- R_Q18 - What was the percent forest area of the world in 2016?
+with t0 as (
+    SELECT 
+        ROUND(perc_land_designed_as_forest_sq_km::numeric, 2) AS total_area_sq_km_word_2016 --R_Q1
+    FROM 
+        forestation f
+    WHERE 1=1
+        and "year" = 2016
+        and country_name = 'World'
+)
+,t1 as (
+select 
+region,
+sum(forest_area_sq_km)/sum(total_area_sq_km)*100 as perc_land_designed_as_forest_per_region
+from forestation f2
+where 1=1
+and "year" = 2016
+group by region 
+)
+,t2 as (
+select 
+region,
+perc_land_designed_as_forest_per_region,
+rank() over (order by perc_land_designed_as_forest_per_region ) as rnk_asc,
+rank() over (order by perc_land_designed_as_forest_per_region desc) as rnk_desc
+from t1
+)
+,t3 as (
+select 
+region, --R_Q2
+perc_land_designed_as_forest_per_region as perc_land_designed_as_forest_per_region_low --R_Q3  
+from t2
+where rnk_asc =1
+)
+,t4 as (
+select 
+region, --R_Q4
+perc_land_designed_as_forest_per_region as perc_land_designed_as_forest_per_region_high --R_Q5
+from t2
+where rnk_desc =1
+)
+
+
+;
+
+
+
 
 -- 3. COUNTRY-LEVEL DETAIL
