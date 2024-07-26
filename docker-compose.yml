@@ -33,10 +33,24 @@ services:
     depends_on:
       - postgres
 
+  data-import:
+    build: ./deforestation-exploration-data-import
+    container_name: deforestation-exploration-data-import
+    hostname: deforestation-exploration-data-import
+    environment:
+      BASE_PATH: /app/datasets
+      DB_URL: postgresql://postgres:mysecretpassword@deforestation-exploration-db:5432/postgres
+    volumes:
+      - ./datasets:/app/datasets
+    depends_on:
+      - postgres
+    networks:
+      - deforestation-exploration-network
+
 networks:
   deforestation-exploration-network:
     name: deforestation-exploration-network
 
 volumes:
-  pgadmindata:
+  deforestation-exploration-pgadmin-data:
     name: deforestation-exploration-pgadmin-data
