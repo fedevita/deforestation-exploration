@@ -56,7 +56,6 @@ country_eq_name as G_Q5,
 country_eq_total_area_sq_km as G_Q6
 from t3;
 
-
 -- 2. REGIONAL OUTLOOK
 -- R_Q1 - In 2016, what was the percent of the total land area of the world designated as forest?
 -- R_Q2 - Which region had the highest relative forestation in 2016?
@@ -76,51 +75,36 @@ from t3;
 -- R_Q16 - What was the impact of the decrease in these two regions on the overall percent forest area of the world from 1990 to 2016?
 -- R_Q17 - What was the percent forest area of the world in 1990?
 -- R_Q18 - What was the percent forest area of the world in 2016?
-with t0 as (
-    SELECT 
-        ROUND(perc_land_designed_as_forest_sq_km::numeric, 2) AS total_area_sq_km_word_2016 --R_Q1
-    FROM 
-        forestation f
-    WHERE 1=1
-        and "year" = 2016
-        and country_name = 'World'
-)
-,t1 as (
+
+-- Le precedenti domande trovano risposta nei dati tabellari della seguente query
+
+with 
+t1 as (
 select 
-region,
-sum(forest_area_sq_km)/sum(total_area_sq_km)*100 as perc_land_designed_as_forest_per_region
-from forestation f2
-where 1=1
-and "year" = 2016
-group by region 
+f1.region,
+round((sum(f1.forest_area_sq_km)/sum(f1.total_area_sq_km)*100)::numeric,2) as forest_percentage_in_1990
+from forestation f1
+where f1."year" = 1990
+group by f1.region
 )
 ,t2 as (
+select
+f2.region,
+round((sum(f2.forest_area_sq_km)/sum(f2.total_area_sq_km)*100)::numeric,2) as forest_percentage_in_2016
+from forestation f2
+where f2."year" = 2016
+group by f2.region
+)
 select 
-region,
-perc_land_designed_as_forest_per_region,
-rank() over (order by perc_land_designed_as_forest_per_region ) as rnk_asc,
-rank() over (order by perc_land_designed_as_forest_per_region desc) as rnk_desc
+t1.region,
+t1.forest_percentage_in_1990,
+t2.forest_percentage_in_2016
 from t1
-)
-,t3 as (
-select 
-region, --R_Q2
-perc_land_designed_as_forest_per_region as perc_land_designed_as_forest_per_region_low --R_Q3  
-from t2
-where rnk_asc =1
-)
-,t4 as (
-select 
-region, --R_Q4
-perc_land_designed_as_forest_per_region as perc_land_designed_as_forest_per_region_high --R_Q5
-from t2
-where rnk_desc =1
-)
-
-
+join t2 on t1.region = t2.region
+order by 2 desc,3 desc
 ;
 
-
-
-
 -- 3. COUNTRY-LEVEL DETAIL
+-- 3.A. SUCCESS STORIES
+-- 3.B.	LARGEST CONCERNS
+-- 3.C.	QUARTILES
