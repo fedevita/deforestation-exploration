@@ -57,27 +57,35 @@ country_eq_total_area_sq_km as G_Q6
 from t3;
 
 -- 2. REGIONAL OUTLOOK
--- R_Q1 - In 2016, what was the percent of the total land area of the world designated as forest?
--- R_Q2 - Which region had the highest relative forestation in 2016?
--- R_Q3 - What was the percentage of forestation for the region with the highest relative forestation in 2016?
--- R_Q4 - Which region had the lowest relative forestation in 2016?
--- R_Q5 - What was the percentage of forestation for the region with the lowest relative forestation in 2016?
--- R_Q6 - In 1990, what was the percent of the total land area of the world designated as forest?
--- R_Q7 - Which region had the highest relative forestation in 1990?
--- R_Q8 - What was the percentage of forestation for the region with the highest relative forestation in 1990?
--- R_Q9 - Which region had the lowest relative forestation in 1990?
--- R_Q10 - What was the percentage of forestation for the region with the lowest relative forestation in 1990?
--- R_Q11 - Which regions of the world decreased in percent forest area from 1990 to 2016?
--- R_Q12 - By how much did each of these regions decrease in percentage terms from 1990 to 2016?
--- R_Q13 - What was the initial percentage of forest area for each of these regions in 1990?
--- R_Q14 - What was the final percentage of forest area for each of these regions in 2016?
--- R_Q15 - Did all other regions increase in forest area over this time period?
--- R_Q16 - What was the impact of the decrease in these two regions on the overall percent forest area of the world from 1990 to 2016?
--- R_Q17 - What was the percent forest area of the world in 1990?
--- R_Q18 - What was the percent forest area of the world in 2016?
+-- 2_Q1 - Figure 2.1: Country Details Forest Area Change Percentage, 1990 & 2016:
+with 
+t1 as (
+select 
+f1.region,
+f1.country_name,
+round((sum(f1.forest_area_sq_km)/sum(f1.total_area_sq_km)*100)::numeric,2) as forest_percentage_in_1990
+from forestation f1
+where f1."year" = 1990
+group by f1.region,f1.country_name
+)
+,t2 as (
+select
+f2.region,
+f2.country_name,
+round((sum(f2.forest_area_sq_km)/sum(f2.total_area_sq_km)*100)::numeric,2) as forest_percentage_in_2016
+from forestation f2
+where f2."year" = 2016
+group by f2.region,f2.country_name
+)
+select 
+t1.country_name,
+t2.forest_percentage_in_2016 - t1.forest_percentage_in_1990 as forest_area_change_in_perc
+from t1
+join t2 on t1.region = t2.region
+          and t1.country_name = t2.country_name
+order by 2 desc;
 
--- Le precedenti domande trovano risposta nei dati tabellari della seguente query
-
+-- 2_Q2 - Table 2.1: Percent Forest Area by Region, 1990 & 2016
 with 
 t1 as (
 select 
@@ -98,7 +106,8 @@ group by f2.region
 select 
 t1.region,
 t1.forest_percentage_in_1990,
-t2.forest_percentage_in_2016
+t2.forest_percentage_in_2016,
+t2.forest_percentage_in_2016 - t1.forest_percentage_in_1990 as forest_area_change_in_perc
 from t1
 join t2 on t1.region = t2.region
 order by 2 desc,3 desc
@@ -106,5 +115,142 @@ order by 2 desc,3 desc
 
 -- 3. COUNTRY-LEVEL DETAIL
 -- 3.A. SUCCESS STORIES
+-- 3_A_Q1 Top 5 Increase in Forest Area by Country, 1990 & 2016
+with 
+t1 as (
+select 
+f1.region,
+f1.country_name,
+round(sum(f1.forest_area_sq_km::numeric),2) as forest_area_in_1990
+from forestation f1
+where f1."year" = 1990
+group by f1.region,f1.country_name
+)
+,t2 as (
+select 
+f2.region,
+f2.country_name,
+round(sum(f2.total_area_sq_km),2) as total_area_sq_km_in_2016,
+round(sum(f2.forest_area_sq_km::numeric),2) as forest_area_in_2016
+from forestation f2
+where f2."year" = 2016
+group by f2.region,f2.country_name
+)
+select 
+t1.region,
+t1.country_name,
+t2.total_area_sq_km_in_2016,
+t2.forest_area_in_2016-t1.forest_area_in_1990 as forest_area_change
+from t1
+join t2 on t1.region = t2.region
+and t1.country_name = t2.country_name
+where t2.forest_area_in_2016-t1.forest_area_in_1990 > 0
+and t1.region <> 'World'
+order by 4 desc
+limit 5;
+-- 3_A_Q2 Top 5 Increase in Forest Area percentage by Country, 1990 & 2016
+with 
+t1 as (
+select 
+f1.region,
+f1.country_name,
+round(sum(f1.forest_area_sq_km::numeric),2) as forest_area_in_1990
+from forestation f1
+where f1."year" = 1990
+group by f1.region,f1.country_name
+)
+,t2 as (
+select 
+f2.region,
+f2.country_name,
+round(sum(f2.total_area_sq_km),2) as total_area_sq_km_in_2016,
+round(sum(f2.forest_area_sq_km::numeric),2) as forest_area_in_2016
+from forestation f2
+where f2."year" = 2016
+group by f2.region,f2.country_name
+)
+select 
+t1.region,
+t1.country_name,
+t2.total_area_sq_km_in_2016,
+round((1-(t1.forest_area_in_1990/t2.forest_area_in_2016))*100) as abs_forest_area_change
+from t1
+join t2 on t1.region = t2.region
+and t1.country_name = t2.country_name
+where 1=1
+and t2.forest_area_in_2016 > t1.forest_area_in_1990
+and t1.region <> 'World'
+order by 4 desc
+limit 5;
+
 -- 3.B.	LARGEST CONCERNS
+-- 3_B_Q1 Top 5 Increase in Forest Area by Country, 1990 & 2016
+with 
+t1 as (
+select 
+f1.region,
+f1.country_name,
+round(sum(f1.forest_area_sq_km::numeric),2) as forest_area_in_1990
+from forestation f1
+where f1."year" = 1990
+group by f1.region,f1.country_name
+)
+,t2 as (
+select 
+f2.region,
+f2.country_name,
+round(sum(f2.total_area_sq_km),2) as total_area_sq_km_in_2016,
+round(sum(f2.forest_area_sq_km::numeric),2) as forest_area_in_2016
+from forestation f2
+where f2."year" = 2016
+group by f2.region,f2.country_name
+)
+select 
+t1.region,
+t1.country_name,
+t2.total_area_sq_km_in_2016,
+abs(t2.forest_area_in_2016-t1.forest_area_in_1990) as abs_forest_area_change
+from t1
+join t2 on t1.region = t2.region
+and t1.country_name = t2.country_name
+where t2.forest_area_in_2016 < t1.forest_area_in_1990
+and t1.region <> 'World'
+order by 4 desc 
+limit 3;
+-- 3_B_Q2 Top 5 Increase in Forest Area percentage by Country, 1990 & 2016
+with 
+t1 as (
+select 
+f1.region,
+f1.country_name,
+round(sum(f1.forest_area_sq_km::numeric),2) as forest_area_in_1990
+from forestation f1
+where f1."year" = 1990
+group by f1.region,f1.country_name
+)
+,t2 as (
+select 
+f2.region,
+f2.country_name,
+round(sum(f2.total_area_sq_km),2) as total_area_sq_km_in_2016,
+round(sum(f2.forest_area_sq_km::numeric),2) as forest_area_in_2016
+from forestation f2
+where f2."year" = 2016
+group by f2.region,f2.country_name
+)
+select 
+t1.region,
+t1.country_name,
+t2.total_area_sq_km_in_2016,
+round((1-(t2.forest_area_in_2016/t1.forest_area_in_1990))*100) as abs_forest_area_change
+from t1
+join t2 on t1.region = t2.region
+and t1.country_name = t2.country_name
+where 1=1
+and t2.forest_area_in_2016 < t1.forest_area_in_1990
+and t1.region <> 'World'
+order by 4 desc
+limit 5;
 -- 3.C.	QUARTILES
+-- 3_C_Q1 Table 3.5: Count of Countries Grouped by Forestation Percent Quartiles, 2016
+-- 3_C_Q2 Table 3.6: Top Quartile Countries, 2016
