@@ -148,12 +148,7 @@ LIMIT 5;
 -- 3.C. QUARTILES
 -- 3_C_Q1 - Table 3.5: Count of Countries Grouped by Forestation Percent Quartiles, 2016
 
-SELECT CASE
-           WHEN ROUND(perc_land_designed_as_forest_sq_km :: numeric, 2) BETWEEN 75 AND 100 THEN 4
-           WHEN ROUND(perc_land_designed_as_forest_sq_km :: numeric, 2) BETWEEN 50 AND 75 THEN 3
-           WHEN ROUND(perc_land_designed_as_forest_sq_km :: numeric, 2) BETWEEN 25 AND 50 THEN 2
-           WHEN ROUND(perc_land_designed_as_forest_sq_km :: numeric, 2) BETWEEN 0 AND 25 THEN 1
-       END AS quartile,
+SELECT FLOOR( f.perc_land_designed_as_forest_sq_km/25)+1 AS quartile,
        count(*)
 FROM forestation f
 WHERE f."year" = 2016
@@ -161,6 +156,7 @@ WHERE f."year" = 2016
   AND perc_land_designed_as_forest_sq_km IS NOT NULL
 GROUP BY 1
 ORDER BY 1;
+
 
 -- 3_C_Q2 - Table 3.6: Top Quartile Countries, 2016
 
