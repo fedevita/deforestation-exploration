@@ -1,9 +1,13 @@
 # Deforestation Exploration
+
 ## UDACITY - SQL - Nanodegree Program
 
 ### Setting Up the Environment
 
-//TODO
+To set up the environment, run the following command in your terminal:
+```sh
+docker-compose up -d
+```
 
 ### Accessing the Database
 
